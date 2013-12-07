@@ -5,6 +5,8 @@
  * this file and include it in basic-server.js so that it actually works.
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
 
+
+
 exports.handleRequest = function(request, response) {
   /* the 'request' argument comes from nodes http module. It includes info about the
   request - such as what URL the browser is requesting. */
@@ -21,6 +23,23 @@ exports.handleRequest = function(request, response) {
 
     if (request.method === "GET") {
       statusCode = 200;
+
+      var url = require('url');
+      console.log(request.url);
+      var url_parts = url.parse(request.url, true);
+      console.log(url_parts);
+      var query = url_parts.query;
+      console.log(query);
+      var order = query.order;
+      console.log(order);
+      if (order[0] === '-') {
+        order = order.substring(1);
+        console.log(responseObj.results);
+        responseObj.results = responseObj.results.sort(function(a, b) {
+          return (new Date(b[order])) - (new Date(a[order]));
+        });
+        // console.log(responseObj)
+      }
     }
     if (request.method === 'OPTIONS') {
       statusCode = 200;
@@ -48,6 +67,9 @@ exports.handleRequest = function(request, response) {
         responseObj.results.push(data);
         console.log(responseObj);
       });
+
+      // sort the data
+
     }
   // } else {
   //   statusCode = 404;
@@ -63,11 +85,7 @@ exports.handleRequest = function(request, response) {
    * anything back to the client until you do. The string you pass to
    * response.end() will be the body of the response - i.e. what shows
    * up in the browser.*/
-  // if (request.method === "GET") {
-  //   thisResponse = responseObj;
-  // } else 
 
-  // console.log(thisResponse);
   response.end(JSON.stringify(responseObj));
 };
 
