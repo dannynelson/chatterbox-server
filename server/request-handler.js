@@ -38,8 +38,10 @@ exports.handleRequest = function(request, response) {
       request.setEncoding('utf8');
       request.on('data', function(data) {
         data = JSON.parse(data);
-        data['createdAt'] = "2013-10-07T16:22:03.280Z";
-        data['updatedAt'] = '2013-10-07T16:22:03.280Z';
+        var date = new Date();
+        date = date.toISOString();
+        data['createdAt'] = date;
+        data['updatedAt'] = date;
         responseObj.results.push(data);
         console.log(responseObj);
       });
