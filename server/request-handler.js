@@ -17,10 +17,13 @@ exports.handleRequest = function(request, response) {
   // if (request.url == "http://127.0.0.1:8080/classes/room1") {
     var headers = defaultCorsHeaders;
 
+    headers['Content-Type'] = "application/json";
+
     if (request.method === "GET") {
       statusCode = 200;
     }
     if (request.method === 'OPTIONS') {
+      statusCode = 200;
       console.log('!OPTIONS');
       headers = {};
       // IE8 does not allow domains to be specified, just the *
@@ -50,12 +53,8 @@ exports.handleRequest = function(request, response) {
   //   statusCode = 404;
   // }
 
-
-
   /* Without this line, this server wouldn't work. See the note
    * below about CORS. */
-  
-  headers['Content-Type'] = "application/json";
 
   /* .writeHead() tells our server what HTTP status code to send back */
   response.writeHead(statusCode, headers);
