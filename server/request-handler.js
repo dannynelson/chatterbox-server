@@ -12,14 +12,25 @@ exports.handleRequest = function(request, response) {
   /* Documentation for both request and response can be found at
    * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
 
+  var statusCode;
   console.log("Serving request type " + request.method + " for url " + request.url);
-
-  var thisResponse = [];
-  
-  var statusCode = 200;
-  if (request.method === "POST") {
-    statusCode = 201;
+  if (request.url == "http://127.0.0.1:8080/classes/room1") {
+    if (request.method === "GET") {
+      statusCode = 200;
+    }
+    if (request.method === "POST") {
+      statusCode = 201;
+      request.setEncoding('utf8');
+      request.on('data', function(data) {
+        thisResponse.push(JSON.parse(data));
+        console.log(thisResponse);
+      });
+    }
+  } else {
+    statusCode = 404;
   }
+
+
 
   /* Without this line, this server wouldn't work. See the note
    * below about CORS. */
@@ -38,9 +49,12 @@ exports.handleRequest = function(request, response) {
   //   thisResponse = responseObj;
   // } else 
 
-
+  console.log(thisResponse);
   response.end(JSON.stringify(thisResponse));
 };
+
+var thisResponse = [];
+
 
 /* These headers will allow Cross-Origin Resource Sharing (CORS).
  * This CRUCIAL code allows this server to talk to websites that
@@ -55,21 +69,21 @@ var defaultCorsHeaders = {
 };
 
 var responseObj = {};
-responseObj.results = [
-  {
-    createdAt: "2013-10-07T16:22:03.280Z",
-    objectId: "teDOY3Rnpe",
-    roomname: "lobby",
-    text: "hello",
-    updatedAt: "2013-10-07T16:22:03.280Z",
-    username: "gary"
-  }, 
-  {
-    createdAt: "2013-10-07T16:22:03.280Z",
-    objectId: "teDOY3Rnpe",
-    roomname: "lobby",
-    text: "wassup",
-    updatedAt: "2013-10-07T16:22:03.280Z",
-    username: "gary"
-  }
-];
+// responseObj.results = [
+//   {
+//     createdAt: "2013-10-07T16:22:03.280Z",
+//     objectId: "teDOY3Rnpe",
+//     roomname: "lobby",
+//     text: "hello",
+//     updatedAt: "2013-10-07T16:22:03.280Z",
+//     username: "gary"
+//   }, 
+//   {
+//     createdAt: "2013-10-07T16:22:03.280Z",
+//     objectId: "teDOY3Rnpe",
+//     roomname: "lobby",
+//     text: "wassup",
+//     updatedAt: "2013-10-07T16:22:03.280Z",
+//     username: "gary"
+//   }
+// ];
