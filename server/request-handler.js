@@ -20,16 +20,36 @@ exports.handleRequest = function(request, response) {
    * below about CORS. */
   var headers = defaultCorsHeaders;
 
-  headers['Content-Type'] = "text/plain";
+  headers['Content-Type'] = "application/json";
 
   /* .writeHead() tells our server what HTTP status code to send back */
   response.writeHead(statusCode, headers);
+
+  var responseObj = {};
+  
+  responseObj.results = [{
+    createdAt: "2013-10-07T16:22:03.280Z",
+    objectId: "teDOY3Rnpe",
+    roomname: "lobby",
+    text: "hello",
+    updatedAt: "2013-10-07T16:22:03.280Z",
+    username: "gary"
+  }, {
+    createdAt: "2013-10-07T16:22:03.280Z",
+    objectId: "teDOY3Rnpe",
+    roomname: "lobby",
+    text: "hello",
+    updatedAt: "2013-10-07T16:22:03.280Z",
+    username: "gary"
+  }];
 
   /* Make sure to always call response.end() - Node will not send
    * anything back to the client until you do. The string you pass to
    * response.end() will be the body of the response - i.e. what shows
    * up in the browser.*/
-  response.end("Hello, World!");
+  console.log(responseObj);
+
+  response.end(JSON.stringify(responseObj));
 };
 
 /* These headers will allow Cross-Origin Resource Sharing (CORS).
