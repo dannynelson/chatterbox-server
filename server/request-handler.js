@@ -14,42 +14,32 @@ exports.handleRequest = function(request, response) {
 
   console.log("Serving request type " + request.method + " for url " + request.url);
 
+  var thisResponse = [];
+  
   var statusCode = 200;
+  if (request.method === "POST") {
+    statusCode = 201;
+  }
 
   /* Without this line, this server wouldn't work. See the note
    * below about CORS. */
   var headers = defaultCorsHeaders;
-
+  
   headers['Content-Type'] = "application/json";
 
   /* .writeHead() tells our server what HTTP status code to send back */
   response.writeHead(statusCode, headers);
 
-  var responseObj = {};
-  
-  responseObj.results = [{
-    createdAt: "2013-10-07T16:22:03.280Z",
-    objectId: "teDOY3Rnpe",
-    roomname: "lobby",
-    text: "hello",
-    updatedAt: "2013-10-07T16:22:03.280Z",
-    username: "gary"
-  }, {
-    createdAt: "2013-10-07T16:22:03.280Z",
-    objectId: "teDOY3Rnpe",
-    roomname: "lobby",
-    text: "hello",
-    updatedAt: "2013-10-07T16:22:03.280Z",
-    username: "gary"
-  }];
-
   /* Make sure to always call response.end() - Node will not send
    * anything back to the client until you do. The string you pass to
    * response.end() will be the body of the response - i.e. what shows
    * up in the browser.*/
-  console.log(responseObj);
+  // if (request.method === "GET") {
+  //   thisResponse = responseObj;
+  // } else 
 
-  response.end(JSON.stringify(responseObj));
+
+  response.end(JSON.stringify(thisResponse));
 };
 
 /* These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -63,3 +53,23 @@ var defaultCorsHeaders = {
   "access-control-allow-headers": "content-type, accept",
   "access-control-max-age": 10 // Seconds.
 };
+
+var responseObj = {};
+responseObj.results = [
+  {
+    createdAt: "2013-10-07T16:22:03.280Z",
+    objectId: "teDOY3Rnpe",
+    roomname: "lobby",
+    text: "hello",
+    updatedAt: "2013-10-07T16:22:03.280Z",
+    username: "gary"
+  }, 
+  {
+    createdAt: "2013-10-07T16:22:03.280Z",
+    objectId: "teDOY3Rnpe",
+    roomname: "lobby",
+    text: "wassup",
+    updatedAt: "2013-10-07T16:22:03.280Z",
+    username: "gary"
+  }
+];
