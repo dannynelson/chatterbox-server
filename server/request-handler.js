@@ -5,11 +5,12 @@
  * this file and include it in basic-server.js so that it actually works.
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
 
-var defaultCorsHeaders = {
+var headers = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
   "access-control-allow-headers": "content-type, accept",
-  "access-control-max-age": 10 // Seconds.
+  "access-control-max-age": 10,
+  'Content-Type': "application/json"
 };
 
 var responseObj = {};
@@ -32,6 +33,12 @@ responseObj.results = [
   }
 ];
 
+var sendResponse = function(statusCode, response, responseObj) {
+  statusCode = statusCode || 200;
+  response.writeHead(statusCode, headers);
+  response.end(JSON.stringify(responseObj));
+};
+
 exports.handleRequest = function(request, response) {
   /* the 'request' argument comes from nodes http module. It includes info about the
   request - such as what URL the browser is requesting. */
@@ -42,11 +49,6 @@ exports.handleRequest = function(request, response) {
   var statusCode;
   console.log("Serving request type " + request.method + " for url " + request.url);
   var url = require('url');
-  
-  // if (request.url == "http://127.0.0.1:8080/") {
-    var headers = defaultCorsHeaders;
-
-    headers['Content-Type'] = "application/json";
 
     if (request.method === "GET") {
       statusCode = 200;
@@ -89,23 +91,7 @@ exports.handleRequest = function(request, response) {
         console.log(responseObj);
       });
     }
-  // }
-  // else {
-  //   statusCode = 404;
-  // }
-
-  /* Without this line, this server wouldn't work. See the note
-   * below about CORS. */
-
-  /* .writeHead() tells our server what HTTP status code to send back */
-  response.writeHead(statusCode, headers);
-
-  /* Make sure to always call response.end() - Node will not send
-   * anything back to the client until you do. The string you pass to
-   * response.end() will be the body of the response - i.e. what shows
-   * up in the browser.*/
-
-  response.end(JSON.stringify(responseObj));
+  sendResponse(statusCode, response, responseObj);
 };
 
 // var thisResponse = [];
