@@ -13,6 +13,8 @@ var headers = {
   'Content-Type': "application/json"
 };
 
+var objectId = 0;
+
 var responseObj = {};
 responseObj.results = [
   {
@@ -33,75 +35,67 @@ responseObj.results = [
   }
 ];
 
-var sendResponse = function(statusCode, response, responseObj) {
+var sendResponse = function(response, statusCode) {
   statusCode = statusCode || 200;
   response.writeHead(statusCode, headers);
   response.end(JSON.stringify(responseObj));
 };
 
-exports.handleRequest = function(request, response) {
-  /* the 'request' argument comes from nodes http module. It includes info about the
-  request - such as what URL the browser is requesting. */
-
-  /* Documentation for both request and response can be found at
-   * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
-
-  var statusCode;
-  console.log("Serving request type " + request.method + " for url " + request.url);
-  var url = require('url');
-
-    if (request.method === "GET") {
-      statusCode = 200;
-
-      var url_parts = url.parse(request.url, true);
-      var query = url_parts.query;
-      var order = query.order;
-      if (order[0] === '-') {
-        order = order.substring(1);
-        console.log(responseObj.results);
-        responseObj.results = responseObj.results.sort(function(a, b) {
-          return (new Date(b[order])) - (new Date(a[order]));
-        });
-      }
-    }
-    if (request.method === 'OPTIONS') {
-      statusCode = 200;
-      console.log('!OPTIONS');
-      headers = {};
-      // IE8 does not allow domains to be specified, just the *
-      headers["Access-Control-Allow-Origin"] = request.headers.origin;
-      headers["Access-Control-Allow-Origin"] = "*";
-      headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE, OPTIONS";
-      headers["Access-Control-Allow-Credentials"] = false;
-      headers["Access-Control-Max-Age"] = '86400'; // 24 hours
-      headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
-      // response.writeHead(200, headers);
-      // response.end();
-    }
-    if (request.method === "POST") {
-      statusCode = 201;
-      request.setEncoding('utf8');
-      request.on('data', function(data) {
-        data = JSON.parse(data);
-        var date = new Date();
-        date = date.toISOString();
-        data['createdAt'] = date;
-        data['updatedAt'] = date;
-        responseObj.results.push(data);
-        console.log(responseObj);
-      });
-    }
-  sendResponse(statusCode, response, responseObj);
+var GETResponse = function(request, response) {
+  sortByOrder(request);
+  sendResponse(response);
 };
 
-// var thisResponse = [];
+var POSTResponse = function(request, response) {
+  response.setEncoding('utf8');
+  var data = '';
+  response.on('data', function(chunk) {
+    data += chunk;
+  });
+  response.on('end', function() {
+    data = JSON.parse(data);
+    data = addMessageAttributes(data);
+    responseObj.results.push(data);
+  });
+  sendResponse(null, 201);
+};
 
+var OPTIONSResponse = function(request, response) {
+  sendResponse(response);
+};
 
-/* These headers will allow Cross-Origin Resource Sharing (CORS).
- * This CRUCIAL code allows this server to talk to websites that
- * are on different domains. (Your chat client is running from a url
- * like file://your/chat/client/index.html, which is considered a
- * different domain.) */
+var addMessageAttributes = function(data) {
+  var date = new Date();
+  date = date.toISOString();
+  data['createdAt'] = date;
+  data['updatedAt'] = date;
 
+  objectId += 1;
+  data['objectId'] = objectId;
+  return data;
+};
 
+var sortByOrder = function(request) {
+  var url = require('url');
+  var url_parts = url.parse(request.url, true);
+  var query = url_parts.query;
+  var order = query.order;
+  if (order[0] === '-') {
+    order = order.substring(1);
+    responseObj.results = responseObj.results.sort(function(a, b) {
+      return (new Date(b[order])) - (new Date(a[order]));
+    });
+  }
+};
 
+var requestResponse = {
+  'GET': GETResponse,
+  'POST': POSTResponse,
+  'OPTIONS': OPTIONSResponse
+};
+
+exports.handleRequest = function(request, response) {
+  var statusCode;
+  console.log("Serving request type " + request.method + " for url " + request.url);
+  requestResponse[request.method](request, response);
+};
