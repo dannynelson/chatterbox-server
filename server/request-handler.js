@@ -1,10 +1,3 @@
-/* You should implement your request handler function in this file.
- * And hey! This is already getting passed to http.createServer()
- * in basic-server.js. But it won't work as is.
- * You'll have to figure out a way to export this function from
- * this file and include it in basic-server.js so that it actually works.
- * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
-
 var headers = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -46,22 +39,22 @@ var GETResponse = function(request, response) {
   sendResponse(response);
 };
 
+var OPTIONSResponse = function(request, response) {
+  sendResponse(response);
+};
+
 var POSTResponse = function(request, response) {
-  response.setEncoding('utf8');
+  request.setEncoding('utf8');
   var data = '';
-  response.on('data', function(chunk) {
+  request.on('data', function(chunk) {
     data += chunk;
   });
-  response.on('end', function() {
+  request.on('end', function() {
     data = JSON.parse(data);
     data = addMessageAttributes(data);
     responseObj.results.push(data);
   });
-  sendResponse(null, 201);
-};
-
-var OPTIONSResponse = function(request, response) {
-  sendResponse(response);
+  sendResponse(response, 201);
 };
 
 var addMessageAttributes = function(data) {
@@ -77,18 +70,20 @@ var addMessageAttributes = function(data) {
 
 var sortByOrder = function(request) {
   var url = require('url');
-  var url_parts = url.parse(request.url, true);
-  var query = url_parts.query;
-  var order = query.order;
+  var order = url.parse(request.url, true).query.order;
   if (order[0] === '-') {
     order = order.substring(1);
     responseObj.results = responseObj.results.sort(function(a, b) {
       return (new Date(b[order])) - (new Date(a[order]));
     });
+  } else {
+    responseObj.results = responseObj.results.sort(function(a, b) {
+      return (new Date(a[order])) - (new Date(b[order]));
+    });
   }
 };
 
-var requestResponse = {
+var actionList = {
   'GET': GETResponse,
   'POST': POSTResponse,
   'OPTIONS': OPTIONSResponse
@@ -97,5 +92,5 @@ var requestResponse = {
 exports.handleRequest = function(request, response) {
   var statusCode;
   console.log("Serving request type " + request.method + " for url " + request.url);
-  requestResponse[request.method](request, response);
+  actionList[request.method](request, response);
 };
