@@ -5,7 +5,32 @@
  * this file and include it in basic-server.js so that it actually works.
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
 
+var defaultCorsHeaders = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept",
+  "access-control-max-age": 10 // Seconds.
+};
 
+var responseObj = {};
+responseObj.results = [
+  {
+    createdAt: "2013-10-07T16:22:03.280Z",
+    objectId: "teDOY3Rnpe",
+    roomname: "lobby",
+    text: "hello",
+    updatedAt: "2013-10-07T16:22:03.280Z",
+    username: "gary"
+  },
+  {
+    createdAt: "2013-10-07T16:22:03.280Z",
+    objectId: "teDOY3Rnpe",
+    roomname: "lobby",
+    text: "wassup",
+    updatedAt: "2013-10-07T16:22:03.280Z",
+    username: "gary"
+  }
+];
 
 exports.handleRequest = function(request, response) {
   /* the 'request' argument comes from nodes http module. It includes info about the
@@ -16,7 +41,9 @@ exports.handleRequest = function(request, response) {
 
   var statusCode;
   console.log("Serving request type " + request.method + " for url " + request.url);
-  // if (request.url == "http://127.0.0.1:8080/classes/room1") {
+  var url = require('url');
+  
+  // if (request.url == "http://127.0.0.1:8080/") {
     var headers = defaultCorsHeaders;
 
     headers['Content-Type'] = "application/json";
@@ -24,21 +51,15 @@ exports.handleRequest = function(request, response) {
     if (request.method === "GET") {
       statusCode = 200;
 
-      var url = require('url');
-      console.log(request.url);
       var url_parts = url.parse(request.url, true);
-      console.log(url_parts);
       var query = url_parts.query;
-      console.log(query);
       var order = query.order;
-      console.log(order);
       if (order[0] === '-') {
         order = order.substring(1);
         console.log(responseObj.results);
         responseObj.results = responseObj.results.sort(function(a, b) {
           return (new Date(b[order])) - (new Date(a[order]));
         });
-        // console.log(responseObj)
       }
     }
     if (request.method === 'OPTIONS') {
@@ -67,11 +88,9 @@ exports.handleRequest = function(request, response) {
         responseObj.results.push(data);
         console.log(responseObj);
       });
-
-      // sort the data
-
     }
-  // } else {
+  // }
+  // else {
   //   statusCode = 404;
   // }
 
@@ -97,29 +116,6 @@ exports.handleRequest = function(request, response) {
  * are on different domains. (Your chat client is running from a url
  * like file://your/chat/client/index.html, which is considered a
  * different domain.) */
-var defaultCorsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept",
-  "access-control-max-age": 10 // Seconds.
-};
 
-var responseObj = {};
-responseObj.results = [
-  {
-    createdAt: "2013-10-07T16:22:03.280Z",
-    objectId: "teDOY3Rnpe",
-    roomname: "lobby",
-    text: "hello",
-    updatedAt: "2013-10-07T16:22:03.280Z",
-    username: "gary"
-  },
-  {
-    createdAt: "2013-10-07T16:22:03.280Z",
-    objectId: "teDOY3Rnpe",
-    roomname: "lobby",
-    text: "wassup",
-    updatedAt: "2013-10-07T16:22:03.280Z",
-    username: "gary"
-  }
-];
+
+
